@@ -275,6 +275,31 @@ class Api extends CI_Controller {
 		$payload = json_decode(file_get_contents('php://input'));
 		echo $this->API_model->cleanUpDuplicates($payload);
 	}
+	//start added by jeelbert 06-01-21
+	public function fetchAllSMS(){
+		echo $this->API_model->fetchAllSMS();
+	}
+	public function insertApiKey(){
+		$payload = json_decode(file_get_contents('php://input'));
+		echo $this->API_model->insertApiKey($payload);
+	}
+	public function updateApiKey(){
+		$payload = json_decode(file_get_contents('php://input'));
+		echo $this->API_model->updateApiKey($payload);
+	}
+	public function fetchApiKeyByStatus(){
+		$payload = json_decode(file_get_contents('php://input'));
+		echo $this->API_model->fetchApiKeyByStatus($payload);
+	}
+	public function insertSMSManually(){
+		$payload = json_decode(file_get_contents('php://input'));
+		echo $this->API_model->insertSMSManually($payload);
+	}
+	public function cancelSms(){
+		$payload = json_decode(file_get_contents('php://input'));
+		echo $this->API_model->cancelSms($payload);
+	}
+	//end added by jeelbert 06-01-21
 
 
 

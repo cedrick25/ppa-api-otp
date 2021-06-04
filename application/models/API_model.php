@@ -306,7 +306,7 @@
 				$referer = $referer['host'];	
 	    	}
 	    	
-	    	if($referer !== 'unified.probation.gov.ph' && $referer !== '192.168.254.115' && $referer !== '192.168.1.219' && $referer !== '127.0.0.1' && $referer !== 'ks' && $referer !== '202.90.136.122'){
+	    	if($referer !== 'unified.probation.gov.ph' && $referer !== '192.168.254.115' && $referer !== '192.168.1.219' && $referer !== '127.0.0.1' && $referer !== 'ks' && $referer !== '202.90.136.122' &&$referer !== '192.168.43.87'){
 			    die('Unauthorized access');
 			}
 	    	
@@ -4507,16 +4507,325 @@
 
 
 		}
+		//start added by jeelbert 06-01-21
+		public function fetchAllSMS(){
+			$this->db->select('m.*, is.INFO_SYSTEM_NAME, concat(COALESCE(c.USER_FNAME, " "), " ",COALESCE(c.USER_LNAME," ")," ", COALESCE(c.USER_LNAME," ")) as created_by,
+				concat(COALESCE(d.USER_FNAME, " "), " ",COALESCE(d.USER_LNAME," ")," ", COALESCE(d.USER_LNAME," ")) as lastmodified_by');
+			$this->db->from('message as m');
+			$this->db->join('api_key as ak', 'm.api_key_ID = ak.api_key_ID');
+			$this->db->join('INFO_SYSTEM as is', 'is.INFO_SYSTEM_ID = ak.info_system_id');
+			$this->db->join('USERS as c', 'm.CREATED_BY = c.USER_ID', 'left');
+			$this->db->join('USERS as d', 'm.LASTMODIFIED_BY = d.USER_ID', 'left');
+			$get = $this->db->get('');
+			if($get->num_rows() > 0){
+				$response = array(
+					'status' => 'SUCCESS',
+					'message' => 'SUCCESS FETCHING MESSAGES!',
+					'payload' => $get->result()
+				);
+			}else{
+				$response = array(
+					'status' => 'ERROR',
+					'message' => 'DATA NOT FOUND!'
+				);
+			}
+			return json_encode($response);
+		}
+		public function keyGenerator(){
+			do{
+				$date = date('YmdHis');
+				$random = rand().''.$date;
+				$this->db->where('api_key_HASH', $random);
+				$get = $this->db->get('api_key');
+			}while($get->num_rows() > 0);
+			return $random;
+			
+		}
+		public function insertApiKey($payload){
+			if($payload != null){
+				$required_param = 3;
+				$data = array();
+				if(isset($payload->created_by) && !empty($payload->created_by)){
+					$data = array_merge($data, array('created_by' => $payload->created_by, 'created_date' => date('Y-m-d H:i:s')));
+					$required_param--;
+				}
+				if(isset($payload->info_system_id) && !empty($payload->info_system_id)){
+					$data = array_merge($data, array('info_system_id' => $payload->info_system_id));
+					$required_param--;
+				}
+				if(isset($payload->api_key_IP) && !empty($payload->api_key_IP)){
+					$data = array_merge($data, array('api_key_IP' => $payload->api_key_IP));
+					$required_param--;
+				}
+				if($required_param == 0){
+					$data = array_merge($data, array('api_key_HASH' => $this->keyGenerator()));
+					$insert = $this->db->insert('api_key', $data);
+					if($insert){
+						$response = array(
+							'status' => 'SUCCESS',
+							'message' => 'SUCCESS INSERTING API KEY!',
+							'payload' => $this->db->insert_id()
+						);
+					}else{
+						$response = array(
+							'status' => 'ERROR',
+							'message' => 'ERROR INSERTING API KEY!'
+						);
+					}
+				}else{
+					$response = array(
+						'status' => 'ERROR',
+						'message' => 'PLEASE PROVIDE THE CORRECT PARAMETER!'
+					);
+				}
+			}else{
+				$response = array(
+					'status' => 'ERROR',
+					'message' => 'PLEASE CHECK YOUR DATA!'
+				);
+			}
+			return json_encode($response);
+		}
+		public function updateApiKey($payload){
+			if($payload != null){
+				$required_param = 2;
+				$field = ["api_key_IP", "info_system_id", "status"];
+				foreach($payload as $key => $value){
+					if(!empty($value) && in_array($key, $field)){
+						$this->db->set($key, $value);
+					}
+				}
+				if(isset($payload->lastmodified_by) && !empty($payload->lastmodified_by)){
+					$this->db->set('lastmodified_by', $payload->lastmodified_by);
+					$required_param--;
+				}
+				if(isset($payload->api_key_ID) && !empty($payload->api_key_ID)){
+					$this->db->where('api_key_ID', $payload->api_key_ID);
+					$required_param--;
+				}
+				if($required_param == 0){
+					$this->db->set('lastmodified_date', date('Y-m-d H:i:s'));
+					$update = $this->db->update('api_key');
+					if($update){
+						$response = array(
+							'status' => 'SUCCESS',
+							'message' => 'SUCCESS UPDATING API KEY!'
+						);
+					}else{
+						$response = array(
+							'status' => 'ERROR',
+							'message' => 'ERROR UPDATING API KEY!'
+						);
+					}
+				}else{
+					$response = array(
+						'status' => 'ERROR',
+						'message' => 'PLEASE PROVIDE THE CORRECT PARAMETER!'
+					);
+				}
+			}else{
+				$response = array(
+					'status' => 'ERROR',
+					'message' => 'PLEASE CHECK YOUR DATA!'
+				);
+			}
+			return json_encode($response);
+		}
+		public function fetchApiKeyByStatus($payload){
+			$this->db->select('a.*, b.INFO_SYSTEM_NAME, 
 
+				concat(COALESCE(c.USER_FNAME, " "), " ",COALESCE(c.USER_LNAME," ")," ", COALESCE(c.USER_LNAME," ")) as created_by,
+				concat(COALESCE(d.USER_FNAME, " "), " ",COALESCE(d.USER_LNAME," ")," ", COALESCE(d.USER_LNAME," ")) as lastmodified_by
 
-
-
-
-
-
-
+				');
+			$this->db->from('api_key as a');
+			$this->db->join('INFO_SYSTEM as b', 'a.info_system_id = b.info_system_id', 'left');
+			$this->db->join('USERS as c', 'a.created_by = c.USER_ID', 'left');
+			$this->db->join('USERS as d', 'a.lastmodified_by = d.USER_ID', 'left');
+			if(isset($payload->status) && !empty($payload->status)){
+				$this->db->where('a.status', $payload->status);
+			}
+			$get = $this->db->get('');
+			if($get->num_rows() > 0 ){
+				$response = array(
+					'status' => 'SUCCESS',
+					'message' => 'SUCCESS FETCHING API KEY!',
+					'payload' => $get->result()
+				);
+			}else{
+				$response = array(
+					'status' => 'ERROR',
+					'message' => 'DATA NOT FOUND!'
+				);
+			}
+			return json_encode($response);
+		}
+		public function verifyApiKeyHash($payload){
+			header('Content-Type: application/json');
+			log_message('debug', '[SMS] Verifying API KEY.');
+			log_message('debug', 'Data: ' . json_encode($payload));
+			$ip = $this->input->ip_address();
+			log_message('debug', 'IP ADDRESS: ' . $ip);
+			if(isset($payload->api_key) && $payload->api_key != ""){
+				$this->load->database();
+				$this->db->where('api_key_HASH', $payload->api_key );
+			    $query = $this->db->get('api_key');
+				if($count_row = $query->num_rows() == 0){
+					log_message('error', '[SMS] INVALID API KEY | Data: ' . json_encode($payload));
+					$response = array('status' => 'ERROR',
+									 'message' => '[SMS] API KEY INVALID!');
+				}else{
+					$api = $query->row();
+					if($api->api_key_IP == '*'){
+						log_message('debug', '[SMS] Valid API KEY.');
+						$response = array('status' => 'SUCCESS',
+								 'message' => 'API FOUND',
+								 'payload' => array('api_key_ID'=>$api->api_key_ID));
+					}else if($api->api_key_IP == $ip){
+						log_message('debug', '[SMS] Valid API KEY.');
+						$response = array('status' => 'SUCCESS',
+								 'message' => 'API FOUND',
+								 'payload' => array('api_key_ID'=>$api->api_key_ID));	
+					}else{
+						log_message('error', '[SMS] Invalid IP Source Address');
+						$response = array('status' => 'ERROR',
+								 'message' => 'INVALID IP SOURCE ADDRESS');
+					}
+				}
+			}else{
+				log_message('error', '[SMS] API KEY NOT FOUND | Data: ' . json_encode($payload));
+				$response = array('status' => 'ERROR',
+								 'message' => 'API KEY NOT FOUND');
+			}
+				return json_encode($response);
+		}
+		public function dateValidation($date){
+			if($date != null){
+				$dateNow = date_create($date);
+				$dateFormat = date_format($dateNow, 'Y-m-d');
+				$timeFormat = date_format($dateNow, 'H:i');
+				if(strtotime($dateFormat) >= strtotime(date('Y-m-d '))){
+					if(strtotime($timeFormat) >= strtotime(date('H:i '))){
+						$response = array(
+							'status' => 'SUCCESS',
+							'message' => 'SUCCESSS'
+						);
+					}else{
+						$response = array(
+							'status' => 'ERROR',
+							'message' => 'TIME CANNOT BE LESS THAN TODAY!'
+						);
+					}
+				}else{
+					$response = array(
+						'status' => 'ERROR',
+						'message' => 'DATE CANNOT BE LESS THAN TODAY!'
+					);
+				}
+			}else{
+				$response = array(
+					'status' => 'ERROR',
+					'message' => 'DATE CANNOT BE NULL'
+				);
+			}
+			return json_encode($response);
+		}
+		public function insertSMSManually($payload){
+			if($payload != null){
+				$verify = json_decode($this->verifyApiKeyHash($payload));
+				if($verify->status == 'SUCCESS'){
+					$ip = $this->input->ip_address();
+					$field = ["message_CONTENT", "message_DATETIME", "message_TO", "CREATED_BY"];
+					$errorFields = array();
+					$required_param = 4;
+					$data = array();
+					foreach ($payload as $key => $value) {
+						if($key != 'api_key'){
+							if(!empty($value) && in_array($key, $field)){
+								$data = array_merge($data, array($key => $value));
+								$required_param--;
+							}else{
+								array_push($errorFields, $key.' cannot be empty ');
+							}
+						}
+					}
+					if($required_param == 0){
+						$validateDate= json_decode($this->dateValidation($payload->message_DATETIME));
+						if($validateDate->status == 'SUCCESS'){
+							$data = array_merge($data, array('api_key_ID' => $verify->payload->api_key_ID, 'message_FROM' => $ip, 'CREATED_DATE' => date('Y-m-d H:i:s')));
+							$insert = $this->db->insert('message', $data);
+							if($insert){
+								$response = array(
+									'status' => 'SUCCESS',
+									'message' => 'SUCCESS INSERTING MESSAGE!',
+									'payload' => $this->db->insert_id()
+								);
+							}else{
+								$response = array(
+									'status' => 'ERROR',
+									'message' => 'ERROR INSERTING MESSAGE!'
+								);
+							}
+						}else{
+							$response = $validateDate;
+						}
+					}else{
+						$response = array(
+							'status' => 'ERROR',
+							'message' => $errorFields
+						);
+					}
+				}else{
+					$response = $verify;
+				}
+			}else{
+				$response = array(
+					'status' => 'ERROR',
+					'message' => 'PLEASE CHECK YOUR DATA!'
+				);
+			}
+			return json_encode($response);
+		}
+		public function cancelSms($payload){
+			if($payload != null){
+				$required_param = 2;
+				if(isset($payload->message_ID) && !empty($payload->message_ID)){
+					$this->db->where('message_ID', $payload->message_ID);
+					$required_param--;
+				}
+				if(isset($payload->LASTMODIFIED_BY) && !empty($payload->LASTMODIFIED_BY)){
+					$this->db->set('LASTMODIFIED_BY', $payload->LASTMODIFIED_BY);
+					$this->db->set('LASTMODIFIED_DATE', date('Y-m-d H:i:s'));
+					$required_param--;
+				}
+				if($required_param == 0){
+					$this->db->set('message_STATUS', 4);
+					$update = $this->db->update('message');
+					if($update){
+						$response = array(
+							'status' => 'SUCCESS',
+							'message' => 'SUCCESS CANCELLING MESSAGE!'
+						);
+					}else{
+						$response = array(
+							'status' => 'ERROR',
+							'message' => 'ERROR CANCELLING MESSAGE'
+						);
+					}
+				}else{
+					$response = array(
+						'status' => 'ERROR',
+						'message' => 'PLEASE PROVIDE THE CORRECT PARAMETER!'
+					);
+				}
+			}else{
+				$response = array(
+					'status' => 'ERROR',
+					'message' => 'PLEASE CHECK YOUR DATA!'
+				);
+			}
+			return json_encode($response);
+		}
+		//end added by jeelbert 06-01-21
 	}
-
-
-
 ?>
