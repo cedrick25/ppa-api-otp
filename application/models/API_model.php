@@ -4737,7 +4737,7 @@
 					$ip = $this->input->ip_address();
 					$field = ["message_CONTENT", "message_DATETIME", "message_TO", "CREATED_BY"];
 					$errorFields = array();
-					$required_param = 4;
+					$required_param = 3;
 					$data = array();
 					foreach ($payload as $key => $value) {
 						if($key != 'api_key'){
@@ -4749,7 +4749,7 @@
 							}
 						}
 					}
-					if($required_param == 0){
+					if($required_param <= 0){
 						$validateDate= json_decode($this->dateValidation($payload->message_DATETIME));
 						if($validateDate->status == 'SUCCESS'){
 							$data = array_merge($data, array('api_key_ID' => $verify->payload->api_key_ID, 'message_FROM' => $ip, 'CREATED_DATE' => date('Y-m-d H:i:s')));
