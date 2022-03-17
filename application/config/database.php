@@ -75,9 +75,9 @@ $query_builder = TRUE;
 
 $db['default'] = array(
 	'dsn'	=> '',
-	'hostname' => 'ppa.staging',
-	'username' => 'ppa',
-	'password' => 'ppapis',
+	'hostname' => 'localhost',
+	'username' => 'ppa-sms',
+	'password' => 'p4xg4n3rn',
 	'database' => 'ppa_sso',
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',

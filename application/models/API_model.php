@@ -306,7 +306,7 @@
 				$referer = $referer['host'];	
 	    	}
 	    	
-	    	if($referer !== 'unified.probation.gov.ph' && $referer !== '192.168.254.115' && $referer !== '192.168.1.219' && $referer !== '127.0.0.1' && $referer !== 'ks' && $referer !== '202.90.136.122' &&$referer !== '192.168.43.87'){
+	    	if($referer !== 'unified.probation.gov.ph' && $referer !== '192.168.1.200' && $referer !== '192.168.254.115' && $referer !== '192.168.1.219' && $referer !== '127.0.0.1' && $referer !== 'ks' && $referer !== '202.90.136.122' &&$referer !== '192.168.43.87'){
 			    die('Unauthorized access');
 			}
 	    	
