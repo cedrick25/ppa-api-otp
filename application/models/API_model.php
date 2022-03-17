@@ -4735,7 +4735,7 @@
 				$verify = json_decode($this->verifyApiKeyHash($payload));
 				if($verify->status == 'SUCCESS'){
 					$ip = $this->input->ip_address();
-					$field = ["message_CONTENT", "message_DATETIME", "message_TO", "CREATED_BY"];
+					$field = ["message_CONTENT", "message_DATETIME", "message_TO", "CREATED_BY", "email_TO"];
 					$errorFields = array();
 					$required_param = 3;
 					$data = array();
