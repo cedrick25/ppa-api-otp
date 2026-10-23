@@ -1,3 +1,16 @@
+# PHP2Shell: turn off upload-progress tracking before PHP reads the request.
+# This blocks one known path. Updating PHP is still required.
+<IfModule php_module>
+  php_flag session.upload_progress.enabled Off
+</IfModule>
+
+# Leave the old PHP 7.4 FastCGI handler. Use the patched Apache PHP module.
+<IfModule fcgid_module>
+  <FilesMatch \.php$>
+    SetHandler application/x-httpd-php
+  </FilesMatch>
+</IfModule>
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
   #RewriteBase /wms/

@@ -1,4 +1,7 @@
 <?php
+
+require __DIR__ . '/application/config/php_runtime_check.php';
+
 /**
  * CodeIgniter
  *
@@ -66,14 +69,20 @@
 switch (ENVIRONMENT)
 {
 	case 'development':
-		error_reporting(-1);
+		// Keep real errors visible. Hide deprecations so CodeIgniter 3 can
+		// run on a patched PHP 8 build without burying the page.
+		error_reporting(E_ALL & ~E_DEPRECATED);
 		ini_set('display_errors', 1);
 	break;
 
 	case 'testing':
 	case 'production':
 		ini_set('display_errors', 0);
-		if (version_compare(PHP_VERSION, '5.3', '>='))
+		if (PHP_VERSION_ID >= 80400)
+		{
+			error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED & ~E_USER_NOTICE & ~E_USER_DEPRECATED);
+		}
+		elseif (version_compare(PHP_VERSION, '5.3', '>='))
 		{
 			error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED & ~E_STRICT & ~E_USER_NOTICE & ~E_USER_DEPRECATED);
 		}

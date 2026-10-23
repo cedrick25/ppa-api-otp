@@ -247,9 +247,12 @@ if ( ! is_php('5.4'))
 	if (extension_loaded('mbstring'))
 	{
 		define('MB_ENABLED', TRUE);
-		// mbstring.internal_encoding is deprecated starting with PHP 5.6
-		// and it's usage triggers E_DEPRECATED messages.
-		@ini_set('mbstring.internal_encoding', $charset);
+		// Deprecated since PHP 5.6. Setting it still raises a diagnostic,
+		// and hiding that diagnostic does not make PHP2Shell safer.
+		if ( ! is_php('5.6'))
+		{
+			@ini_set('mbstring.internal_encoding', $charset);
+		}
 		// This is required for mb_convert_encoding() to strip invalid characters.
 		// That's utilized by CI_Utf8, but it's also done for consistency with iconv.
 		mb_substitute_character('none');
@@ -264,16 +267,19 @@ if ( ! is_php('5.4'))
 	if (extension_loaded('iconv'))
 	{
 		define('ICONV_ENABLED', TRUE);
-		// iconv.internal_encoding is deprecated starting with PHP 5.6
-		// and it's usage triggers E_DEPRECATED messages.
-		@ini_set('iconv.internal_encoding', $charset);
+		// Deprecated since PHP 5.6. Setting it still raises a diagnostic,
+		// and hiding that diagnostic does not make PHP2Shell safer.
+		if ( ! is_php('5.6'))
+		{
+			@ini_set('iconv.internal_encoding', $charset);
+		}
 	}
 	else
 	{
 		define('ICONV_ENABLED', FALSE);
 	}
 
-	if (is_php('5.6'))
+	if (is_php('5.6') && ! is_php('7.0'))
 	{
 		ini_set('php.internal_encoding', $charset);
 	}
